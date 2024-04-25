@@ -1,0 +1,37 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.9.1')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'org.apache.hadoop:hadoop-mapreduce-client-core:3.2.1'
+    implementation 'org.apache.hadoop:hadoop-common:3.2.1'
+}
+
+// Define the main classes for which you want to generate JAR files
+def mainClasses = ['SalesStatistics', 'WordCount']
+// Iterate over the main classes and create a separate JAR task for each
+mainClasses.each { mainClass ->
+    task("${mainClass.split('\\.')[-1].toLowerCase()}Jar", type: Jar) {
+        // Set the JAR file name to be based on the main class name
+        archiveFileName = "${mainClass.split('\\.')[-1]}.${archiveExtension.get()}"
+        // Set the main class for the JAR file
+        manifest {
+            attributes 'Main-Class': mainClass
+        }
+        // Set the source directory to be the output directory for the main class
+        from("build/classes/java/main/${mainClass.split('\\\\.').dropRight(1).join('/')}")
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
